@@ -5,12 +5,15 @@ EventEmitter = (require 'events').EventEmitter
 module.exports = (game, opts) ->
   return new Use(game, opts)
 
+module.exports.pluginInfo =
+  loadAfter: ['reach', 'registry', 'inventory-hotbar']
+
 class Use extends EventEmitter
   constructor: (@game, opts) ->
 
-    @reach = opts.reach ? throw 'voxel-use requires "reach" option set to voxel-reach instance'
-    @registry = game.registry ? opts.registry ? throw 'voxel-use requires "registry" option set to voxel-registry instance'
-    @inventoryHotbar = opts.inventoryHotbar ? throw 'voxel-use requires "inventoryHotbar" option set to voxel-inventory-hotbar instance' # TODO: better means to connect these?
+    @reach = game.plugins?.all.reach ? throw 'voxel-use requires "voxel-reach" plugin'
+    @registry = game.plugins?.all.registry ? throw 'voxel-use requires "voxel-registry" plugin'
+    @inventoryHotbar = game.plugins?.all['inventory-hotbar'] ? throw 'voxel-use requires "voxel-inventory-hotbar" plugin'
     @enable()
 
   enable: () ->
