@@ -33,7 +33,7 @@ class Use extends EventEmitter
         if props.onInteract?
           # this block handles its own interaction
           # TODO: redesign this? cancelable event?
-          preventDefault = props.onInteract()
+          preventDefault = props.onInteract(target)
           return if preventDefault
 
       if @registry.isBlock(@inventoryHotbar.held()?.item)

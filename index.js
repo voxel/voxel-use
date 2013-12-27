@@ -60,7 +60,7 @@
           clickedBlock = _this.registry.getBlockName(clickedBlockID);
           props = _this.registry.getBlockProps(clickedBlock);
           if (props.onInteract != null) {
-            preventDefault = props.onInteract();
+            preventDefault = props.onInteract(target);
             if (preventDefault) {
               return;
             }
