@@ -11,7 +11,7 @@
   };
 
   module.exports.pluginInfo = {
-    loadAfter: ['reach', 'registry', 'inventory-hotbar']
+    loadAfter: ['voxel-reach', 'voxel-registry', 'voxel-inventory-hotbar']
   };
 
   Use = (function(_super) {
@@ -22,7 +22,7 @@
       this.game = game;
       this.reach = (function() {
         var _ref1;
-        if ((_ref = (_ref1 = game.plugins) != null ? _ref1.all.reach : void 0) != null) {
+        if ((_ref = (_ref1 = game.plugins) != null ? _ref1.get('voxel-reach') : void 0) != null) {
           return _ref;
         } else {
           throw 'voxel-use requires "voxel-reach" plugin';
@@ -30,7 +30,7 @@
       })();
       this.registry = (function() {
         var _ref2;
-        if ((_ref1 = (_ref2 = game.plugins) != null ? _ref2.all.registry : void 0) != null) {
+        if ((_ref1 = (_ref2 = game.plugins) != null ? _ref2.get('voxel-registry') : void 0) != null) {
           return _ref1;
         } else {
           throw 'voxel-use requires "voxel-registry" plugin';
@@ -38,7 +38,7 @@
       })();
       this.inventoryHotbar = (function() {
         var _ref3;
-        if ((_ref2 = (_ref3 = game.plugins) != null ? _ref3.all['inventory-hotbar'] : void 0) != null) {
+        if ((_ref2 = (_ref3 = game.plugins) != null ? _ref3.get('voxel-inventory-hotbar') : void 0) != null) {
           return _ref2;
         } else {
           throw 'voxel-use requires "voxel-inventory-hotbar" plugin';
