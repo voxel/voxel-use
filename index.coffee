@@ -1,5 +1,3 @@
-# vim: set shiftwidth=2 tabstop=2 softtabstop=2 expandtab:
-
 EventEmitter = (require 'events').EventEmitter
 
 module.exports = (game, opts) ->
@@ -17,7 +15,7 @@ class Use extends EventEmitter
     @enable()
 
   enable: () ->
-    @reach.on 'interact', @onInteract = (target) =>
+    @reach.on 'use', @onInteract = (target) =>
       if not target
         console.log 'waving'
         return
@@ -58,5 +56,5 @@ class Use extends EventEmitter
         console.log 'use item',@inventoryHotbar.held()
 
   disable: () ->
-    @reach.removeListener 'interact', @onInteract
+    @reach.removeListener 'use', @onInteract
 

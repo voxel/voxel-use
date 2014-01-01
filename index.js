@@ -49,7 +49,7 @@
 
     Use.prototype.enable = function() {
       var _this = this;
-      return this.reach.on('interact', this.onInteract = function(target) {
+      return this.reach.on('use', this.onInteract = function(target) {
         var clickedBlock, clickedBlockID, currentBlockID, preventDefault, props, taken, _ref;
         if (!target) {
           console.log('waving');
@@ -85,7 +85,7 @@
     };
 
     Use.prototype.disable = function() {
-      return this.reach.removeListener('interact', this.onInteract);
+      return this.reach.removeListener('use', this.onInteract);
     };
 
     return Use;
