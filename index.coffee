@@ -9,9 +9,9 @@ module.exports.pluginInfo =
 class Use extends EventEmitter
   constructor: (@game, opts) ->
 
-    @reach = game.plugins?.get('voxel-reach') ? throw 'voxel-use requires "voxel-reach" plugin'
-    @registry = game.plugins?.get('voxel-registry') ? throw 'voxel-use requires "voxel-registry" plugin'
-    @inventoryHotbar = game.plugins?.get('voxel-inventory-hotbar') ? throw 'voxel-use requires "voxel-inventory-hotbar" plugin'
+    @reach = game.plugins?.get('voxel-reach') ? throw new Error('voxel-use requires "voxel-reach" plugin')
+    @registry = game.plugins?.get('voxel-registry') ? throw new Error('voxel-use requires "voxel-registry" plugin')
+    @inventoryHotbar = game.plugins?.get('voxel-inventory-hotbar') ? throw new Error('voxel-use requires "voxel-inventory-hotbar" plugin')
     @enable()
 
   enable: () ->

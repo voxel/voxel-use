@@ -25,7 +25,7 @@
         if ((_ref = (_ref1 = game.plugins) != null ? _ref1.get('voxel-reach') : void 0) != null) {
           return _ref;
         } else {
-          throw 'voxel-use requires "voxel-reach" plugin';
+          throw new Error('voxel-use requires "voxel-reach" plugin');
         }
       })();
       this.registry = (function() {
@@ -33,7 +33,7 @@
         if ((_ref1 = (_ref2 = game.plugins) != null ? _ref2.get('voxel-registry') : void 0) != null) {
           return _ref1;
         } else {
-          throw 'voxel-use requires "voxel-registry" plugin';
+          throw new Error('voxel-use requires "voxel-registry" plugin');
         }
       })();
       this.inventoryHotbar = (function() {
@@ -41,7 +41,7 @@
         if ((_ref2 = (_ref3 = game.plugins) != null ? _ref3.get('voxel-inventory-hotbar') : void 0) != null) {
           return _ref2;
         } else {
-          throw 'voxel-use requires "voxel-inventory-hotbar" plugin';
+          throw new Error('voxel-use requires "voxel-inventory-hotbar" plugin');
         }
       })();
       this.enable();
