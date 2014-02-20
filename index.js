@@ -50,7 +50,7 @@
     Use.prototype.enable = function() {
       return this.reach.on('use', this.onInteract = (function(_this) {
         return function(target) {
-          var clickedBlock, clickedBlockID, currentBlockID, preventDefault, props, taken, _ref;
+          var clickedBlock, clickedBlockID, consumed, currentBlockID, item, preventDefault, props, taken, _ref;
           if (!target) {
             console.log('waving');
             return;
@@ -79,7 +79,17 @@
             currentBlockID = _this.registry.getBlockID(taken.item);
             return _this.game.setBlock(target.adjacent, currentBlockID);
           } else {
-            return console.log('use item', _this.inventoryHotbar.held());
+            item = _this.inventoryHotbar.held();
+            if (item != null) {
+              console.log('use item', item);
+              props = _this.registry.getItemProps(item.item);
+              if ((props != null) && props.onUse) {
+                consumed = props.onUse(item);
+                if (consumed) {
+                  return _this.inventoryHotbar.takeHeld(consumed | 0);
+                }
+              }
+            }
           }
         };
       })(this));

@@ -53,7 +53,15 @@ class Use extends EventEmitter
       else
         # 3. TODO: use items (if !isBlock)
         # TODO: other interactions depending on item (ex: click button, check target.sub; or other interactive blocks)
-        console.log 'use item',@inventoryHotbar.held()
+        item = @inventoryHotbar.held() # TODO: move 'selected item' concept to voxel-carry? not gui
+        if item?
+          console.log 'use item',item
+
+          props = @registry.getItemProps(item.item)
+          if props? and props.onUse
+            consumed = props.onUse item
+            if consumed
+              @inventoryHotbar.takeHeld consumed|0
 
   disable: () ->
     @reach.removeListener 'use', @onInteract
