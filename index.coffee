@@ -11,19 +11,13 @@ class Use extends EventEmitter
 
     @reach = game.plugins?.get('voxel-reach') ? throw new Error('voxel-use requires "voxel-reach" plugin')
     @registry = game.plugins?.get('voxel-registry') ? throw new Error('voxel-use requires "voxel-registry" plugin')
-    @inventoryHotbar = game.plugins?.get('voxel-inventory-hotbar') ? throw new Error('voxel-use requires "voxel-inventory-hotbar" plugin')
+    @inventoryHotbar = game.plugins?.get('voxel-inventory-hotbar') ? throw new Error('voxel-use requires "voxel-inventory-hotbar" plugin') # TODO: move held to voxel-carry?
     @enable()
 
   enable: () ->
     @reach.on 'use', @onInteract = (target) =>
-      if not target
-        console.log 'waving'
-        return
-
-      # TODO: major refactor
-
       # 1. block interaction
-      if target.voxel? and !@game.buttons.crouch
+      if target?.voxel? and !@game.buttons.crouch
         clickedBlockID = @game.getBlock(target.voxel)  # TODO: should voxel-reach get this?
         clickedBlock = @registry.getBlockName(clickedBlockID)
 
@@ -34,34 +28,37 @@ class Use extends EventEmitter
           preventDefault = props.onInteract(target)
           return if preventDefault
 
-      if @registry.isBlock(@inventoryHotbar.held()?.item)
-        # 2. place blocks
+      # 2. use items in hand
+      held = @inventoryHotbar?.held()
+     
+      if held?.item
+        props = @registry.getItemProps(held.item)
+        if props?.onUse
+          # 2a. use items
 
-        # test if can place block here (not blocked by self), before consuming inventory
-        # (note: canCreateBlock + setBlock = createBlock, but we want to check in between)
-        if not @game.canCreateBlock target.adjacent
-          console.log 'blocked'
-          return
+          # TODO: other interactions depending on item (ex: click button, check target.sub; or other interactive blocks)
+          consumed = props.onUse held
+          if consumed
+            @inventoryHotbar.takeHeld consumed|0
 
-        taken = @inventoryHotbar.takeHeld(1)
-        if not taken?
-          console.log 'nothing in this inventory slot to use'
-          return
+        else if @registry.isBlock held.item
+          # 2b. place itemblocks
+          
+          # test if can place block here (not blocked by self), before consuming inventory
+          # (note: canCreateBlock + setBlock = createBlock, but we want to check in between)
+          if not @game.canCreateBlock target?.adjacent # TODO: allow 'using' blocks when clicked in air? (no target)
+            console.log 'blocked'
+            return
 
-        currentBlockID = @registry.getBlockID(taken.item)
-        @game.setBlock target.adjacent, currentBlockID
+          taken = @inventoryHotbar.takeHeld(1)
+          if not taken?
+            console.log 'nothing in this inventory slot to use'
+            return
+
+          currentBlockID = @registry.getBlockID(taken.item)
+          @game.setBlock target.adjacent, currentBlockID
       else
-        # 3. TODO: use items (if !isBlock)
-        # TODO: other interactions depending on item (ex: click button, check target.sub; or other interactive blocks)
-        item = @inventoryHotbar.held() # TODO: move 'selected item' concept to voxel-carry? not gui
-        if item?
-          console.log 'use item',item
-
-          props = @registry.getItemProps(item.item)
-          if props? and props.onUse
-            consumed = props.onUse item
-            if consumed
-              @inventoryHotbar.takeHeld consumed|0
+        console.log 'waving'
 
   disable: () ->
     @reach.removeListener 'use', @onInteract

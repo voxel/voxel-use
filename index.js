@@ -50,12 +50,8 @@
     Use.prototype.enable = function() {
       return this.reach.on('use', this.onInteract = (function(_this) {
         return function(target) {
-          var clickedBlock, clickedBlockID, consumed, currentBlockID, item, preventDefault, props, taken, _ref;
-          if (!target) {
-            console.log('waving');
-            return;
-          }
-          if ((target.voxel != null) && !_this.game.buttons.crouch) {
+          var clickedBlock, clickedBlockID, consumed, currentBlockID, held, preventDefault, props, taken, _ref;
+          if (((target != null ? target.voxel : void 0) != null) && !_this.game.buttons.crouch) {
             clickedBlockID = _this.game.getBlock(target.voxel);
             clickedBlock = _this.registry.getBlockName(clickedBlockID);
             props = _this.registry.getBlockProps(clickedBlock);
@@ -66,30 +62,29 @@
               }
             }
           }
-          if (_this.registry.isBlock((_ref = _this.inventoryHotbar.held()) != null ? _ref.item : void 0)) {
-            if (!_this.game.canCreateBlock(target.adjacent)) {
-              console.log('blocked');
-              return;
-            }
-            taken = _this.inventoryHotbar.takeHeld(1);
-            if (taken == null) {
-              console.log('nothing in this inventory slot to use');
-              return;
-            }
-            currentBlockID = _this.registry.getBlockID(taken.item);
-            return _this.game.setBlock(target.adjacent, currentBlockID);
-          } else {
-            item = _this.inventoryHotbar.held();
-            if (item != null) {
-              console.log('use item', item);
-              props = _this.registry.getItemProps(item.item);
-              if ((props != null) && props.onUse) {
-                consumed = props.onUse(item);
-                if (consumed) {
-                  return _this.inventoryHotbar.takeHeld(consumed | 0);
-                }
+          held = (_ref = _this.inventoryHotbar) != null ? _ref.held() : void 0;
+          if (held != null ? held.item : void 0) {
+            props = _this.registry.getItemProps(held.item);
+            if (props != null ? props.onUse : void 0) {
+              consumed = props.onUse(held);
+              if (consumed) {
+                return _this.inventoryHotbar.takeHeld(consumed | 0);
               }
+            } else if (_this.registry.isBlock(held.item)) {
+              if (!_this.game.canCreateBlock(target != null ? target.adjacent : void 0)) {
+                console.log('blocked');
+                return;
+              }
+              taken = _this.inventoryHotbar.takeHeld(1);
+              if (taken == null) {
+                console.log('nothing in this inventory slot to use');
+                return;
+              }
+              currentBlockID = _this.registry.getBlockID(taken.item);
+              return _this.game.setBlock(target.adjacent, currentBlockID);
             }
+          } else {
+            return console.log('waving');
           }
         };
       })(this));
