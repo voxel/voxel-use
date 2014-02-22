@@ -36,10 +36,18 @@ class Use extends EventEmitter
         if props?.onUse
           # 2a. use items
 
-          # TODO: other interactions depending on item (ex: click button, check target.sub; or other interactive blocks)
-          consumed = props.onUse held, target
-          if consumed
-            @inventoryHotbar.takeHeld consumed|0
+          ret = props.onUse held, target
+          if typeof ret == 'undefined'
+            # nothing 
+          else if typeof ret == 'number' || typeof ret == 'boolean'
+            # consume this many
+            consumeCount = ret|0
+            @inventoryHotbar.takeHeld consumeCount
+          else if typeof ret == 'object'
+            # (assumed ItemPile instance (TODO: instanceof? but..))
+            # replace item - used for voxel-bucket
+            # TODO: handle if item count >1? this replaces the whole pile
+            @inventoryHotbar.replaceHeld ret
 
         else if @registry.isBlock held.item
           # 2b. place itemblocks

@@ -50,7 +50,7 @@
     Use.prototype.enable = function() {
       return this.reach.on('use', this.onInteract = (function(_this) {
         return function(target) {
-          var clickedBlock, clickedBlockID, consumed, currentBlockID, held, preventDefault, props, taken, _ref;
+          var clickedBlock, clickedBlockID, consumeCount, currentBlockID, held, preventDefault, props, ret, taken, _ref;
           if (((target != null ? target.voxel : void 0) != null) && !_this.game.buttons.crouch) {
             clickedBlockID = _this.game.getBlock(target.voxel);
             clickedBlock = _this.registry.getBlockName(clickedBlockID);
@@ -66,9 +66,14 @@
           if (held != null ? held.item : void 0) {
             props = _this.registry.getItemProps(held.item);
             if (props != null ? props.onUse : void 0) {
-              consumed = props.onUse(held, target);
-              if (consumed) {
-                return _this.inventoryHotbar.takeHeld(consumed | 0);
+              ret = props.onUse(held, target);
+              if (typeof ret === 'undefined') {
+
+              } else if (typeof ret === 'number' || typeof ret === 'boolean') {
+                consumeCount = ret | 0;
+                return _this.inventoryHotbar.takeHeld(consumeCount);
+              } else if (typeof ret === 'object') {
+                return _this.inventoryHotbar.replaceHeld(ret);
               }
             } else if (_this.registry.isBlock(held.item)) {
               if (!_this.game.canCreateBlock(target != null ? target.adjacent : void 0)) {
