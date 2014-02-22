@@ -37,7 +37,7 @@ class Use extends EventEmitter
           # 2a. use items
 
           # TODO: other interactions depending on item (ex: click button, check target.sub; or other interactive blocks)
-          consumed = props.onUse held
+          consumed = props.onUse held, target
           if consumed
             @inventoryHotbar.takeHeld consumed|0
 

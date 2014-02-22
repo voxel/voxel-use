@@ -66,7 +66,7 @@
           if (held != null ? held.item : void 0) {
             props = _this.registry.getItemProps(held.item);
             if (props != null ? props.onUse : void 0) {
-              consumed = props.onUse(held);
+              consumed = props.onUse(held, target);
               if (consumed) {
                 return _this.inventoryHotbar.takeHeld(consumed | 0);
               }
