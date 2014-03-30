@@ -76,7 +76,7 @@
                 return _this.inventoryHotbar.replaceHeld(ret);
               }
             } else if (_this.registry.isBlock(held.item)) {
-              return _this.useBlock(target);
+              return _this.inventoryHotbar.replaceHeld(_this.useBlock(target, held));
             }
           } else {
             return console.log('waving');
@@ -85,23 +85,23 @@
       })(this));
     };
 
-    Use.prototype.useBlock = function(target) {
-      var currentBlockID, held, taken, _ref;
-      held = (_ref = this.inventoryHotbar) != null ? _ref.held() : void 0;
-      if (held == null) {
-        return;
-      }
+    Use.prototype.useBlock = function(target, held) {
+      var currentBlockID, taken;
       if (!this.game.canCreateBlock(target != null ? target.adjacent : void 0)) {
         console.log('blocked');
-        return;
+        return held;
       }
-      taken = this.inventoryHotbar.takeHeld(1);
+      taken = held.splitPile(1);
+      if (held.count === 0) {
+        held = void 0;
+      }
       if (taken == null) {
         console.log('nothing in this inventory slot to use');
-        return;
+        return held;
       }
       currentBlockID = this.registry.getBlockID(taken.item);
-      return this.game.setBlock(target.adjacent, currentBlockID);
+      this.game.setBlock(target.adjacent, currentBlockID);
+      return held;
     };
 
     Use.prototype.disable = function() {
