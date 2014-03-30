@@ -51,22 +51,27 @@ class Use extends EventEmitter
 
         else if @registry.isBlock held.item
           # 2b. place itemblocks
-          
-          # test if can place block here (not blocked by self), before consuming inventory
-          # (note: canCreateBlock + setBlock = createBlock, but we want to check in between)
-          if not @game.canCreateBlock target?.adjacent # TODO: allow 'using' blocks when clicked in air? (no target)
-            console.log 'blocked'
-            return
-
-          taken = @inventoryHotbar.takeHeld(1)
-          if not taken?
-            console.log 'nothing in this inventory slot to use'
-            return
-
-          currentBlockID = @registry.getBlockID(taken.item)
-          @game.setBlock target.adjacent, currentBlockID
+          @useBlock target
       else
         console.log 'waving'
+
+  useBlock: (target) ->
+    held = @inventoryHotbar?.held()
+    return if not held?
+
+    # test if can place block here (not blocked by self), before consuming inventory
+    # (note: canCreateBlock + setBlock = createBlock, but we want to check in between)
+    if not @game.canCreateBlock target?.adjacent # TODO: allow 'using' blocks when clicked in air? (no target)
+      console.log 'blocked'
+      return
+
+    taken = @inventoryHotbar.takeHeld(1)
+    if not taken?
+      console.log 'nothing in this inventory slot to use'
+      return
+
+    currentBlockID = @registry.getBlockID(taken.item)
+    @game.setBlock target.adjacent, currentBlockID
 
   disable: () ->
     @reach.removeListener 'use', @onInteract

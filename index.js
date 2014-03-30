@@ -50,7 +50,7 @@
     Use.prototype.enable = function() {
       return this.reach.on('use', this.onInteract = (function(_this) {
         return function(target) {
-          var clickedBlock, clickedBlockID, consumeCount, currentBlockID, held, preventDefault, props, ret, taken, _ref;
+          var clickedBlock, clickedBlockID, consumeCount, held, preventDefault, props, ret, _ref;
           if (((target != null ? target.voxel : void 0) != null) && !_this.game.buttons.crouch) {
             clickedBlockID = _this.game.getBlock(target.voxel);
             clickedBlock = _this.registry.getBlockName(clickedBlockID);
@@ -76,23 +76,32 @@
                 return _this.inventoryHotbar.replaceHeld(ret);
               }
             } else if (_this.registry.isBlock(held.item)) {
-              if (!_this.game.canCreateBlock(target != null ? target.adjacent : void 0)) {
-                console.log('blocked');
-                return;
-              }
-              taken = _this.inventoryHotbar.takeHeld(1);
-              if (taken == null) {
-                console.log('nothing in this inventory slot to use');
-                return;
-              }
-              currentBlockID = _this.registry.getBlockID(taken.item);
-              return _this.game.setBlock(target.adjacent, currentBlockID);
+              return _this.useBlock(target);
             }
           } else {
             return console.log('waving');
           }
         };
       })(this));
+    };
+
+    Use.prototype.useBlock = function(target) {
+      var currentBlockID, held, taken, _ref;
+      held = (_ref = this.inventoryHotbar) != null ? _ref.held() : void 0;
+      if (held == null) {
+        return;
+      }
+      if (!this.game.canCreateBlock(target != null ? target.adjacent : void 0)) {
+        console.log('blocked');
+        return;
+      }
+      taken = this.inventoryHotbar.takeHeld(1);
+      if (taken == null) {
+        console.log('nothing in this inventory slot to use');
+        return;
+      }
+      currentBlockID = this.registry.getBlockID(taken.item);
+      return this.game.setBlock(target.adjacent, currentBlockID);
     };
 
     Use.prototype.disable = function() {
