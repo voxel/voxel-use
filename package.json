@@ -1,12 +1,11 @@
 {
   "name": "voxel-use",
   "description": "use items and blocks (voxel.js plugin)",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "repository": {
     "type": "git",
     "url": "git@github.com:deathcap/voxel-use.git"
   },
-  "dependencies": {
-  },
+  "dependencies": {},
   "license": "MIT"
 }
