@@ -73,7 +73,7 @@ class Use extends EventEmitter
       console.log 'nothing in this inventory slot to use'
       return held
 
-    currentBlockID = @registry.getBlockID(taken.item)
+    currentBlockID = @registry.getBlockIndex(taken.item)
     @game.setBlock target.adjacent, currentBlockID
     return held
 

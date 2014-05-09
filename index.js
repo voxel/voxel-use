@@ -99,7 +99,7 @@
         console.log('nothing in this inventory slot to use');
         return held;
       }
-      currentBlockID = this.registry.getBlockID(taken.item);
+      currentBlockID = this.registry.getBlockIndex(taken.item);
       this.game.setBlock(target.adjacent, currentBlockID);
       return held;
     };
