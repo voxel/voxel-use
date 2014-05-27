@@ -57,9 +57,15 @@ class Use extends EventEmitter
 
   # place a block on target and decrement held
   useBlock: (target, held) ->
+    if not target
+      # right-clicked air with a block, does nothing
+      # TODO: allow 'using' blocks when clicked in air? (no target) (see also: voxel-skyhook)
+      console.log 'waving block'
+      return held
+
     # test if can place block here (not blocked by self), before consuming inventory
     # (note: canCreateBlock + setBlock = createBlock, but we want to check in between)
-    if not @game.canCreateBlock target?.adjacent # TODO: allow 'using' blocks when clicked in air? (no target)
+    if not @game.canCreateBlock target.adjacent
       console.log 'blocked'
       return held
 
