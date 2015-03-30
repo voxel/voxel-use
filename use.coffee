@@ -51,7 +51,9 @@ class Use extends EventEmitter
 
         else if @registry.isBlock held.item
           # 2b. place itemblocks
-          @inventoryHotbar.replaceHeld @useBlock(target, held)
+          newHeld = @useBlock(target, held)
+          @inventoryHotbar.replaceHeld newHeld
+          @emit 'usedBlock', target, held, newHeld
       else
         console.log 'waving'
 
