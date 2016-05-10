@@ -1,90 +1,114 @@
-EventEmitter = (require 'events').EventEmitter
+'use strict';
 
-module.exports = (game, opts) ->
-  return new Use(game, opts)
+const EventEmitter = require('events').EventEmitter;
 
-module.exports.pluginInfo =
-  loadAfter: ['voxel-reach', 'voxel-registry', 'voxel-inventory-hotbar']
+module.exports = (game, opts) => new Use(game, opts);
 
-class Use extends EventEmitter
-  constructor: (@game, opts) ->
+module.exports.pluginInfo = {
+  loadAfter: ['voxel-reach', 'voxel-registry', 'voxel-inventory-hotbar'],
+};
 
-    @reach = game.plugins?.get('voxel-reach') ? throw new Error('voxel-use requires "voxel-reach" plugin')
-    @registry = game.plugins?.get('voxel-registry') ? throw new Error('voxel-use requires "voxel-registry" plugin')
-    @inventoryHotbar = game.plugins?.get('voxel-inventory-hotbar') ? throw new Error('voxel-use requires "voxel-inventory-hotbar" plugin') # TODO: move held to voxel-carry?
-    @enable()
+class Use extends EventEmitter {
+  constructor(game, opts) {
+    super();
 
-  enable: () ->
-    @reach.on 'use', @onInteract = (target) =>
-      # 1. block interaction
-      if target?.voxel? and !@game.buttons.crouch
-        clickedBlockID = @game.getBlock(target.voxel)  # TODO: should voxel-reach get this?
-        clickedBlock = @registry.getBlockName(clickedBlockID)
+    this.game = game;
 
-        props = @registry.getBlockProps(clickedBlock)
-        if props.onInteract?
-          # this block handles its own interaction
-          # TODO: redesign this? cancelable event?
-          preventDefault = props.onInteract(target)
-          return if preventDefault
+    this.reach = game.plugins.get('voxel-reach');
+    if (!this.reach) throw new Error('voxel-use requires "voxel-reach" plugin');
 
-      # 2. use items in hand
-      held = @inventoryHotbar?.held()
+    this.registry = game.plugins.get('voxel-registry');
+    if (!this.registry) throw new Error('voxel-use requires "voxel-registry" plugin');
+
+    this.inventoryHotbar = game.plugins.get('voxel-inventory-hotbar');
+    if (!this.inventoryHotbar) throw new Error('voxel-use requires "voxel-inventory-hotbar" plugin'); // TODO: move held to voxel-carry?
+
+    this.enable();
+  }
+
+  enable() {
+    this.reach.on('use', this.onInteract = (target) => {
+      // 1. block interaction
+      if (target && target.voxel && !this.game.buttons.crouch) {
+        const clickedBlockID = this.game.getBlock(target.voxel);  // TODO: should voxel-reach get this?
+        const clickedBlock = this.registry.getBlockName(clickedBlockID);
+
+        const props = this.registry.getBlockProps(clickedBlock);
+        if (props.onInteract) {
+          // this block handles its own interaction
+          // TODO: redesign this? cancelable event?
+          const preventDefault = props.onInteract(target);
+          if (preventDefault) return;
+        }
+      }
+
+      // 2. use items in hand
+      const held = this.inventoryHotbar.held();
      
-      if held?.item
-        props = @registry.getItemProps(held.item)
-        if props?.onUse
-          # 2a. use items
+      if (held && held.item) {
+        const props = this.registry.getItemProps(held.item);
+        if (props && props.onUse) {
+          // 2a. use items
 
-          ret = props.onUse held, target
-          if typeof ret == 'undefined'
-            # nothing 
-          else if typeof ret == 'number' || typeof ret == 'boolean'
-            # consume this many
-            consumeCount = ret|0
-            @inventoryHotbar.takeHeld consumeCount
-          else if typeof ret == 'object'
-            # (assumed ItemPile instance (TODO: instanceof? but..))
-            # replace item - used for voxel-bucket
-            # TODO: handle if item count >1? this replaces the whole pile
-            @inventoryHotbar.replaceHeld ret
+          const ret = props.onUse(held, target);
+          if (typeof ret === 'undefined') {
+            // nothing 
+          } else if (typeof ret === 'number' || typeof ret === 'boolean') {
+            // consume this many
+            const consumeCount = ret|0;
+            this.inventoryHotbar.takeHeld(consumeCount);
+          } else if (typeof ret === 'object') {
+            // (assumed ItemPile instance (TODO: instanceof? but..))
+            // replace item - used for voxel-bucket
+            // TODO: handle if item count >1? this replaces the whole pile
+            this.inventoryHotbar.replaceHeld(ret);
+          }
+        } else if (this.registry.isBlock(held.item)) {
+          // 2b. place itemblocks
+          const newHeld = this.useBlock(target, held);
+          this.inventoryHotbar.replaceHeld(newHeld);
+          this.emit('usedBlock', target, held, newHeld);
+        }
+      } else {
+        console.log('waving');
+      }
+    });
+  }
 
-        else if @registry.isBlock held.item
-          # 2b. place itemblocks
-          newHeld = @useBlock(target, held)
-          @inventoryHotbar.replaceHeld newHeld
-          @emit 'usedBlock', target, held, newHeld
-      else
-        console.log 'waving'
+  // place a block on target and decrement held
+  useBlock(target, held) {
+    if (!target) {
+      // right-clicked air with a block, does nothing
+      // TODO: allow 'using' blocks when clicked in air? (no target) (see also: voxel-skyhook)
+      console.log('waving block');
+      return held;
+    }
 
-  # place a block on target and decrement held
-  useBlock: (target, held) ->
-    if not target
-      # right-clicked air with a block, does nothing
-      # TODO: allow 'using' blocks when clicked in air? (no target) (see also: voxel-skyhook)
-      console.log 'waving block'
-      return held
+    // test if can place block here (not blocked by self), before consuming inventory
+    // (note: canCreateBlock + setBlock = createBlock, but we want to check in between)
+    if (!this.game.canCreateBlock(target.adjacent)) {
+      console.log('blocked');
+      return held;
+    }
 
-    # test if can place block here (not blocked by self), before consuming inventory
-    # (note: canCreateBlock + setBlock = createBlock, but we want to check in between)
-    if not @game.canCreateBlock target.adjacent
-      console.log 'blocked'
-      return held
+    const taken = held.splitPile(1);
 
-    taken = held.splitPile(1)
+    // clear empty piles (wart due to itempile mutability, and can't use takeHeld here
+    // since held may not necessarily come from the hotbar - if someone else calls us)
+    if (held.count === 0) held = undefined;
 
-    # clear empty piles (wart due to itempile mutability, and can't use takeHeld here
-    # since held may not necessarily come from the hotbar - if someone else calls us)
-    held = undefined if held.count == 0
+    if (taken === undefined) {
+      console.log('nothing in this inventory slot to use');
+      return held;
+    }
 
-    if not taken?
-      console.log 'nothing in this inventory slot to use'
-      return held
+    const currentBlockID = this.registry.getBlockIndex(taken.item);
+    this.game.setBlock(target.adjacent, currentBlockID);
+    return held;
+  }
 
-    currentBlockID = @registry.getBlockIndex(taken.item)
-    @game.setBlock target.adjacent, currentBlockID
-    return held
-
-  disable: () ->
-    @reach.removeListener 'use', @onInteract
+  disable() {
+    this.reach.removeListener('use', this.onInteract);
+  }
+}
 

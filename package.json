@@ -12,10 +12,5 @@
     "plugin"
   ],
   "dependencies": {},
-  "browserify": {
-    "transform": [
-      "coffeeify"
-    ]
-  },
   "license": "MIT"
 }
