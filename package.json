@@ -2,7 +2,7 @@
   "name": "voxel-use",
   "description": "use items and blocks (voxel.js plugin)",
   "version": "0.2.0",
-  "main": "use.coffee",
+  "main": "use.js",
   "repository": {
     "type": "git",
     "url": "git@github.com:deathcap/voxel-use.git"
@@ -12,10 +12,5 @@
     "plugin"
   ],
   "dependencies": {},
-  "browserify": {
-    "transform": [
-      "coffeeify"
-    ]
-  },
   "license": "MIT"
 }
