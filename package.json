@@ -1,7 +1,7 @@
 {
   "name": "voxel-use",
   "description": "use items and blocks (voxel.js plugin)",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "main": "use.js",
   "repository": {
     "type": "git",
